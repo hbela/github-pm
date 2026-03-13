@@ -1,0 +1,12 @@
+{
+  "/(dashboard)/page": "/",
+  "/(dashboard)/repos/[owner]/[repo]/issues/[number]/page": "/repos/[owner]/[repo]/issues/[number]",
+  "/(dashboard)/repos/[owner]/[repo]/page": "/repos/[owner]/[repo]",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/auth/[...nextauth]/route": "/api/auth/[...nextauth]",
+  "/api/github/repos/[owner]/[repo]/issues/route": "/api/github/repos/[owner]/[repo]/issues",
+  "/api/github/repos/route": "/api/github/repos",
+  "/favicon.ico/route": "/favicon.ico",
+  "/login/page": "/login"
+}
