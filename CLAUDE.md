@@ -62,29 +62,48 @@ src/
 │   │   ├── projects/
 │   │   │   ├── page.tsx          # Projects list (GitHub Projects v2)
 │   │   │   └── [projectId]/page.tsx  # Kanban board for a project
-│   │   └── repos/[owner]/[repo]/
-│   │       ├── page.tsx          # Issue list with filters
-│   │       └── issues/[number]/page.tsx  # Issue detail + comments
+│   │   ├── repos/[owner]/[repo]/
+│   │   │   ├── page.tsx          # Issue list with filters + Voice Issue + Meeting Notes buttons
+│   │   │   └── issues/[number]/page.tsx  # Issue detail + comments + AI summarizer
+│   │   ├── sprint-planner/page.tsx       # AI Sprint Planner
+│   │   ├── ai-agent/page.tsx             # AI Agent Dashboard (Phase 4)
+│   │   └── calendar/page.tsx             # Calendar view (Phase 4)
 │   ├── api/
 │   │   ├── auth/[...nextauth]/route.ts
+│   │   ├── ai/
+│   │   │   ├── summarize-issue/route.ts  # POST — issue + comments → IssueSummary
+│   │   │   ├── voice-to-issue/route.ts   # POST — transcript → ParsedIssue
+│   │   │   ├── sprint-plan/route.ts      # POST — issues + capacity → SprintPlan
+│   │   │   ├── agent-analysis/route.ts   # POST — issues + PRs → AgentReport (Phase 4)
+│   │   │   └── meeting-notes/route.ts    # POST — notes → ParsedIssue[] (Phase 4)
 │   │   └── github/
 │   │       ├── repos/route.ts
 │   │       ├── repos/[owner]/[repo]/issues/route.ts
-│   │       ├── projects/route.ts                          # GET list of projects
-│   │       ├── projects/[projectId]/board/route.ts        # GET board columns + items
-│   │       └── projects/[projectId]/items/[itemId]/route.ts  # PATCH move card
+│   │       ├── repos/[owner]/[repo]/issues/create/route.ts   # POST create issue
+│   │       ├── repos/[owner]/[repo]/issues/bulk-create/route.ts  # POST bulk (Phase 4)
+│   │       ├── projects/route.ts
+│   │       ├── projects/[projectId]/board/route.ts
+│   │       ├── projects/[projectId]/items/[itemId]/route.ts
+│   │       ├── calendar/route.ts                              # GET milestones + assigned issues (Phase 4)
+│   │       ├── webhook/route.ts                               # POST GitHub webhook receiver (Phase 4)
+│   │       └── events/latest/route.ts                        # GET last event timestamp (Phase 4)
 │   ├── login/page.tsx
 │   ├── layout.tsx
 │   └── providers.tsx
 ├── auth.ts                       # NextAuth config — scope includes "project" for Projects v2
 ├── lib/
+│   ├── ai/
+│   │   ├── client.ts             # Anthropic SDK singleton — reads ANTHROPIC_API_KEY
+│   │   ├── types.ts              # IssueSummary, ParsedIssue, SprintPlan, AgentReport, etc.
+│   │   └── prompts.ts            # All Claude prompt builders
 │   └── github/
-│       ├── client.ts             # Octokit (REST): repos, issues, comments, labels, milestones
+│       ├── client.ts             # Octokit (REST): repos, issues, PRs, comments, labels, milestones
 │       ├── graphql.ts            # @octokit/graphql: getUserProjects, getProjectBoard, updateProjectItemStatus
-│       ├── types.ts              # Domain models (GHRepo, GHIssue, GHProject, KanbanColumn, etc.)
-│       └── mappers.ts            # REST response → domain types
+│       ├── types.ts              # Domain models (GHRepo, GHIssue, GHProject, KanbanColumn, GHPullRequest, etc.)
+│       ├── mappers.ts            # REST response → domain types
+│       └── webhook.ts            # verifyWebhookSignature, processWebhookEvent (Phase 4)
 ├── components/
-│   ├── layout/header.tsx         # Sticky nav — logo + Projects link + avatar dropdown
+│   ├── layout/header.tsx         # Sticky nav — logo + Projects + Sprint + AI Agent + Calendar + avatar
 │   ├── dashboard/
 │   │   ├── repo-card.tsx
 │   │   └── stats-card.tsx
@@ -97,13 +116,32 @@ src/
 │   │   ├── column.tsx            # DroppableColumn — useDroppable
 │   │   ├── card.tsx              # DraggableCard — useDraggable, labels, assignees
 │   │   └── board-skeleton.tsx    # Loading skeleton
+│   ├── ai/
+│   │   ├── issue-summary.tsx     # <IssueSummary> — idle/loading/success/error states
+│   │   ├── voice-issue-creator.tsx  # Full voice recording + preview state machine
+│   │   ├── agent-dashboard.tsx   # Repo selector + Run Analysis + insights grid (Phase 4)
+│   │   ├── insight-card.tsx      # Single AI insight card (Phase 4)
+│   │   ├── standup-report.tsx    # Yesterday/Today/Blockers display (Phase 4)
+│   │   └── meeting-notes-extractor.tsx  # Modal — textarea → parsed issue checklist (Phase 4)
+│   ├── sprint/
+│   │   ├── sprint-planner-form.tsx  # Repo multi-select + team capacity config
+│   │   └── sprint-result.tsx        # Capacity bar + per-assignee task columns
+│   ├── prs/                      # Phase 4
+│   │   ├── pr-row.tsx            # Single PR row — state badge, author, labels
+│   │   └── pr-status-badge.tsx   # open / merged / closed / draft badge
+│   ├── calendar/                 # Phase 4
+│   │   ├── calendar-grid.tsx     # 7-column CSS grid month view
+│   │   └── calendar-event.tsx    # Milestone / issue chip on a day cell
 │   └── ui/                       # shadcn auto-generated components
 └── hooks/
     ├── use-repos.ts
     ├── use-issues.ts
     ├── use-projects.ts           # TanStack Query: fetch GHProject[]
     ├── use-project-board.ts      # TanStack Query: fetch ProjectBoard
-    └── use-move-item.ts          # TanStack Mutation: PATCH item status
+    ├── use-move-item.ts          # TanStack Mutation: PATCH item status
+    ├── use-sprint-plan.ts        # TanStack Mutation: POST /api/ai/sprint-plan
+    ├── use-agent-analysis.ts     # TanStack Mutation: POST /api/ai/agent-analysis (Phase 4)
+    └── use-calendar.ts           # TanStack Query: GET /api/github/calendar (Phase 4)
 ```
 
 ## Environment Variables
@@ -113,6 +151,8 @@ AUTH_GITHUB_ID=          # GitHub OAuth App Client ID
 AUTH_GITHUB_SECRET=      # GitHub OAuth App Client Secret
 AUTH_SECRET=             # Random secret for NextAuth JWT signing
 NEXTAUTH_URL=http://localhost:3000
+ANTHROPIC_API_KEY=       # Claude API key — Phase 3 AI features
+GITHUB_WEBHOOK_SECRET=   # Webhook HMAC secret — Phase 4 webhook integration
 ```
 
 GitHub OAuth App callback URL: `http://localhost:3000/api/auth/callback/github`
@@ -135,7 +175,21 @@ OAuth scope: `read:user user:email repo project` — the `project` scope is requ
 - `GHProjectItem` — project item linking an issue to its statusOptionId
 - `KanbanColumn` — column grouping items by status option
 
+**Phase 4 (Pull Requests + Calendar)**
+- `GHPullRequest` — PR with state, draft flag, reviewers, checksStatus, head/base branch
+- `PRState` — `"open" | "closed" | "merged"`
+- `CalendarEvent` — union: `{ kind: "milestone" }` | `{ kind: "issue" }`
+
 GraphQL mappers are internal to `src/lib/github/graphql.ts` (camelCase from GitHub API). REST mappers live in `mappers.ts` (snake_case).
+
+## AI Models (src/lib/ai/types.ts)
+
+- `IssueSummary` — `{ summary, decisions[], actionItems[] }` — Phase 3.1
+- `ParsedIssue` — `{ title, description, assignee, labels[], priority }` — Phase 3.2
+- `SprintAssignment` / `SprintPlan` — sprint output grouped by assignee — Phase 3.3
+- `AgentInsight` — `{ type, severity, message, issueNumbers?, actionLabel?, actionUrl? }` — Phase 4.2
+- `StandupReport` — `{ yesterday[], today[], blockers[] }` — Phase 4.2
+- `AgentReport` — `{ insights[], standup, generatedAt }` — Phase 4.2
 
 ## GitHub API Functions
 
@@ -151,6 +205,9 @@ GraphQL mappers are internal to `src/lib/github/graphql.ts` (camelCase from GitH
 | `getIssueComments(owner, repo, number)` | Issue comments |
 | `getRepoLabels(owner, repo)` | All labels |
 | `getRepoMilestones(owner, repo)` | Open milestones |
+| `getRepoPullRequests(owner, repo, state)` | PR list — Phase 4 |
+| `getPullRequest(owner, repo, number)` | Single PR — Phase 4 |
+| `getAssignedIssues()` | Issues assigned to current user across all repos — Phase 4 |
 
 ### GraphQL — `src/lib/github/graphql.ts`
 
@@ -160,9 +217,11 @@ GraphQL mappers are internal to `src/lib/github/graphql.ts` (camelCase from GitH
 | `getProjectBoard(projectId)` | Fetches project + Status field + items grouped into KanbanColumns |
 | `updateProjectItemStatus(projectId, itemId, fieldId, optionId)` | Moves a card to a new column |
 
-## Next Phase: Phase 3
+## Next Phase: Phase 4
 
-Phase 3 candidates (from PRD):
-- AI issue summarizer (Claude API)
-- Voice-to-issue creation (Web Speech API → Claude → GitHub issue)
-- Sprint planner AI suggestions
+Phase 4 features (spec in `docs/phase4.md`):
+- **4.1** Pull Request Management — PR list/detail pages, PR badge on Kanban cards
+- **4.2** AI Agent Dashboard — blockers, duplicates, task suggestions, stand-up report
+- **4.3** Meeting Notes → Issues — paste notes → Claude extracts → bulk-create
+- **4.4** GitHub Webhook Integration — HMAC-verified receiver, near-real-time board refresh
+- **4.5** Calendar View — monthly grid with milestones and assigned issues
