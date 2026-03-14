@@ -39,7 +39,7 @@ export function mapUser(raw: any): GHUser {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mapLabel(raw: any): GHLabel {
   return {
-    id: raw.id,
+    id: String(raw.id),
     name: raw.name,
     color: raw.color,
     description: raw.description ?? null,

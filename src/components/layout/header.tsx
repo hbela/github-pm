@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { signOut } from "next-auth/react"
-import { GitBranch, LogOut, User } from "lucide-react"
+import { GitBranch, Kanban, LogOut, User, CalendarRange } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -30,6 +30,20 @@ export function Header({ user }: HeaderProps) {
         </Link>
 
         <nav className="flex items-center gap-4">
+          <Link
+            href="/projects"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Kanban className="h-4 w-4" />
+            <span>Projects</span>
+          </Link>
+          <Link
+            href="/sprint-planner"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <CalendarRange className="h-4 w-4" />
+            <span>Sprint</span>
+          </Link>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">

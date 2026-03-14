@@ -13,6 +13,7 @@ import {
   MessageSquare,
 } from "lucide-react"
 import { getIssue, getIssueComments } from "@/lib/github/client"
+import { IssueSummary } from "@/components/ai/issue-summary"
 import { CommentList } from "@/components/issues/comment-list"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -149,6 +150,9 @@ async function IssueDetailContent({
               )}
             </div>
           </div>
+
+          {/* AI Summary */}
+          <IssueSummary owner={owner} repo={repo} number={issueNumber} />
 
           {/* Comments */}
           {comments.length > 0 && (

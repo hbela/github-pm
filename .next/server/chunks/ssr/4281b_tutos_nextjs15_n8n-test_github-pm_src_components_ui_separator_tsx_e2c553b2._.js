@@ -1,3 +1,0 @@
-module.exports=[32149,a=>{"use strict";var b=a.i(10441),c=a.i(29134),d=a.i(97815);function e({className:a,orientation:e="horizontal",...f}){return(0,b.jsx)(c.Separator,{"data-slot":"separator",orientation:e,className:(0,d.cn)("shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:w-px data-vertical:self-stretch",a),...f})}a.s(["Separator",()=>e])}];
-
-//# sourceMappingURL=4281b_tutos_nextjs15_n8n-test_github-pm_src_components_ui_separator_tsx_e2c553b2._.js.map

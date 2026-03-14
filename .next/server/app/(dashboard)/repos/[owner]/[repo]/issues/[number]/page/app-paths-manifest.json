@@ -1,3 +1,0 @@
-{
-  "/(dashboard)/repos/[owner]/[repo]/issues/[number]/page": "app/(dashboard)/repos/[owner]/[repo]/issues/[number]/page.js"
-}

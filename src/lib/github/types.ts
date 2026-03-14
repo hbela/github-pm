@@ -6,7 +6,7 @@ export interface GHUser {
 }
 
 export interface GHLabel {
-  id: number
+  id: string  // numeric REST id or GraphQL node ID — always stored as string
   name: string
   color: string
   description?: string | null
@@ -83,4 +83,38 @@ export interface IssueFilters {
   direction?: "asc" | "desc"
   page?: number
   perPage?: number
+}
+
+// --- GitHub Projects v2 ---
+
+export interface GHProject {
+  id: string        // GraphQL node ID (used in mutations)
+  number: number
+  title: string
+  url: string
+}
+
+export interface GHProjectFieldOption {
+  id: string        // singleSelectOptionId used in updateProjectV2ItemFieldValue
+  name: string      // e.g. "Todo", "In Progress", "Done"
+  color: string     // GitHub color name (RED, GREEN, BLUE, etc.)
+}
+
+export interface GHProjectField {
+  id: string
+  name: string      // typically "Status"
+  options: GHProjectFieldOption[]
+}
+
+export interface GHProjectItem {
+  id: string        // GraphQL item node ID
+  issue: GHIssue
+  statusOptionId: string | null
+}
+
+export interface KanbanColumn {
+  optionId: string
+  name: string
+  color: string
+  items: GHProjectItem[]
 }

@@ -4,6 +4,7 @@ import { ChevronLeft, ExternalLink, GitFork, Star, CircleDot } from "lucide-reac
 import { getRepo, getRepoIssues, getRepoLabels, getRepoMilestones } from "@/lib/github/client"
 import { IssueRow } from "@/components/issues/issue-row"
 import { IssueFilters } from "@/components/issues/issue-filters"
+import { VoiceIssueCreator } from "@/components/ai/voice-issue-creator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import type { IssueFilters as IssueFiltersType } from "@/lib/github/types"
@@ -94,12 +95,15 @@ async function RepoIssuesContent({
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters + Voice */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <IssueFilters labels={labels} milestones={milestones} />
-        <span className="text-sm text-muted-foreground">
-          {issues.length} {stateLabel} issues
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">
+            {issues.length} {stateLabel} issues
+          </span>
+          <VoiceIssueCreator owner={owner} repo={repo} />
+        </div>
       </div>
 
       {/* Issue list */}

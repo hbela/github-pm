@@ -100,6 +100,23 @@ export async function getRepoLabels(owner: string, repo: string) {
   return data.map((l) => ({ id: l.id, name: l.name, color: l.color }))
 }
 
+export async function createIssue(
+  owner: string,
+  repo: string,
+  data: { title: string; body?: string; assignees?: string[]; labels?: string[] }
+): Promise<{ number: number; htmlUrl: string; title: string }> {
+  const octokit = await getGithubClient()
+  const { data: issue } = await octokit.rest.issues.create({
+    owner,
+    repo,
+    title: data.title,
+    body: data.body,
+    assignees: data.assignees,
+    labels: data.labels,
+  })
+  return { number: issue.number, htmlUrl: issue.html_url, title: issue.title }
+}
+
 export async function getRepoMilestones(owner: string, repo: string) {
   const octokit = await getGithubClient()
   const { data } = await octokit.rest.issues.listMilestones({
